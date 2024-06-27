@@ -1,0 +1,92 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+class Program
+{
+    static void Main()
+    {
+        Console.Write("Input string: ");
+        string inputString = Console.ReadLine();
+
+        Console.Write("input total number of query: ");
+        int n = int.Parse(Console.ReadLine());
+        int[] queries = new int[n];
+
+        Console.WriteLine("input number query one by one:");
+        for (int i = 0; i < n; i++)
+        {
+            Console.Write($"Query number  {i + 1}: ");
+            queries[i] = int.Parse(Console.ReadLine());
+        }
+
+        Dictionary<string, int> substringWeights = CalculateSubstringWeights(inputString);
+
+        List<string> results = new List<string>();
+        foreach (int query in queries)
+        {
+            if (substringWeights.ContainsValue(query))
+            {
+                results.Add("Yes");
+            }
+            else
+            {
+                results.Add("No");
+            }
+        }
+
+        Console.WriteLine("Output: [" + string.Join(", ", results) + "]");
+    }
+
+    static Dictionary<string, int> CalculateSubstringWeights(string input)
+    {
+        Dictionary<string, int> substringWeights = new Dictionary<string, int>();
+        List<char> sortedCharacters = input.Distinct().OrderBy(c => c).ToList();
+        Dictionary<char, int> charWeights = new Dictionary<char, int>();
+
+        for (int i = 0; i < sortedCharacters.Count; i++)
+        {
+            charWeights[sortedCharacters[i]] = i + 1;
+        }
+
+        int length = input.Length;
+
+        for (int start = 0; start < length; start++)
+        {
+            int weight = 0;
+            int count = 0;
+            char currentChar = input[start];
+
+            for (int end = start; end < length; end++)
+            {
+                if (input[end] == currentChar)
+                {
+                    count++;
+                }
+                else
+                {
+                    weight += charWeights[currentChar] * count;
+                    string substring = input.Substring(start, end - start);
+
+                    if (!substringWeights.ContainsKey(substring) || substringWeights[substring] < weight)
+                    {
+                        substringWeights[substring] = weight;
+                    }
+
+                    currentChar = input[end];
+                    count = 1;
+                }
+            }
+
+            weight += charWeights[currentChar] * count;
+            string lastSubstring = input.Substring(start);
+
+            if (!substringWeights.ContainsKey(lastSubstring) || substringWeights[lastSubstring] < weight)
+            {
+                substringWeights[lastSubstring] = weight;
+            }
+        }
+
+        return substringWeights;
+    }
+}
